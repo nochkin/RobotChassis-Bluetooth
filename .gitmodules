@@ -1,3 +1,6 @@
 [submodule "ArduinoSerialCommand"]
 	path = ArduinoSerialCommand
 	url = https://github.com/scogswell/ArduinoSerialCommand.git
+[submodule "Arduino/ArduinoSerialCommand"]
+	path = Arduino/ArduinoSerialCommand
+	url = https://github.com/scogswell/ArduinoSerialCommand.git
