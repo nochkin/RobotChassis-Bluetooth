@@ -31,15 +31,16 @@ SoftwareSerial mySerial(BT_RX, BT_TX); // RX, TX
 SerialCommand myCmd(mySerial);
 
 void setup() {
+  digitalWrite(BT_RESET, HIGH);
+  digitalWrite(BT_PIO11, LOW);
   pinMode(BT_RESET, OUTPUT);
   pinMode(BT_PIO11, OUTPUT);
 
-  btCommMode();
-  //btATMode();
-  
   Serial.begin(38400);   
   mySerial.begin(38400);
 
+  setupBT();
+  
   setup_lights();
   
   // setup_18200();
@@ -49,7 +50,7 @@ void setup() {
   myCmd.addCommand("STOP", doStop);
   myCmd.addCommand("M", doMotors);
   myCmd.addDefaultHandler(unknownCommand);
-  Serial.println("start");
+  Serial.println("Start");
 }
 
 void loop() {
@@ -156,6 +157,12 @@ void setDriveId_18200(int driveId, int value) {
   }
 }
 
+void setupBT() {
+  //btATMode();
+  //printBTInfo();
+  btCommMode();
+}
+
 void btAT(){
   while(mySerial.available()){
     char myChar = mySerial.read();
@@ -168,19 +175,41 @@ void btAT(){
   }
 }
 
-void btReset() {
+void printBTInfo() {
+  Serial.print("BT Address: ");
+  printBTCommand("ADDR?");
+  Serial.print("BT Name: ");
+  printBTCommand("NAME?");
+  Serial.print("BT Passkey: ");
+  printBTCommand("PSWD?");
+  //printBTCommand("RESET");
+}
+
+void printBTCommand(const char *cmd) {
+  mySerial.write("AT+");
+  mySerial.write(cmd);
+  mySerial.write("\r\n");
+  mySerial.setTimeout(500);
+
+  String data = mySerial.readStringUntil('\r');
+  Serial.println(data);
+  mySerial.flush();
+}
+
+void btReset(byte pio11) {
+  mySerial.flush();
+  delay(500);
+  digitalWrite(BT_PIO11, pio11);
   digitalWrite(BT_RESET, LOW);
-  delay(2000);
-  digitalWrite(BT_RESET, HIGH);
   delay(100);
+  digitalWrite(BT_RESET, HIGH);
+  delay(3000);
 }
 
 void btATMode() {
-  digitalWrite(BT_PIO11, HIGH);
-  btReset();
+  btReset(HIGH);
 }
 
 void btCommMode() {
-  digitalWrite(BT_PIO11, LOW);
-  btReset();
+  btReset(LOW);
 }
