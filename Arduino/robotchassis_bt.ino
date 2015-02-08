@@ -19,7 +19,7 @@ uint8_t l298n[2][2] = {
   {10, 11},
 };
 
-#define MIN_SPEED 25
+#define MIN_SPEED 40
 #define MAX_SPEED 170
 
 #define BT_RX 3
@@ -36,7 +36,7 @@ void setup() {
   pinMode(BT_RESET, OUTPUT);
   pinMode(BT_PIO11, OUTPUT);
 
-  Serial.begin(38400);   
+  Serial.begin(38400);
   mySerial.begin(38400);
 
   setupBT();
@@ -88,10 +88,17 @@ void unknownCommand() {
 
 void doLights() {
   char *arg = myCmd.next();
-  if (strcmp(arg, "0")) {
-    digitalWrite(LIGHTS, LOW);
+  if (arg != NULL) {
+    int iarg = atoi(arg);
+    if (iarg == 0) {
+      digitalWrite(LIGHTS, LOW);
+      mySerial.println("OK LIGHTS OFF");
+    } else {
+      digitalWrite(LIGHTS, HIGH);
+      mySerial.println("OK LIGHTS ON");
+    }
   } else {
-    digitalWrite(LIGHTS, HIGH);
+    mySerial.println("*ERR: Missing LIGHTS arguments");
   }
 }
 
@@ -113,7 +120,7 @@ void doMotors() {
     setDrive(iarg1, iarg2);
     mySerial.println("OK MOTORS");
   } else {
-    mySerial.println("*ERR: Missing arguments");
+    mySerial.println("*ERR: Missing MOTOR arguments");
   }
 }
 
@@ -182,6 +189,7 @@ void printBTInfo() {
   printBTCommand("NAME?");
   Serial.print("BT Passkey: ");
   printBTCommand("PSWD?");
+  printBTCommand("UART=38400,1,0");
   //printBTCommand("RESET");
 }
 
